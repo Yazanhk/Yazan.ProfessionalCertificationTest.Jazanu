@@ -1,5 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+    <style>
+    /* هذا الكود يخفي أي نص إجابة ظاهر خارج التنسيق */
+    .question-card div:not(.explanation):not(.q-header):not(.options),
+    .question-card strong {
+        /* سنقوم بضبط هذا لاحقاً بالسكربت */
+    }
+</style>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,6 +22,8 @@
             --success: #22c55e;
             --danger: #ef4444;
         }
+
+        
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -165,7 +174,7 @@
         .explanation {
             margin-top: 15px;
             padding: 15px;
-            background: rgba(56, 189, 248, 0.08);
+            background: rgba(255, 254, 254, 0.112);
             border-left: 3px solid var(--accent-color);
             border-radius: 0 6px 6px 0;
             font-size: 0.95rem;
@@ -211,7 +220,7 @@
 /* تنسيق نص السؤال */
 .q-header {
   font-size: 18px;
-  color: #1e293b;
+  color: #ffffff;
   line-height: 1.6;
   margin: 0;
 }
@@ -3483,28 +3492,23 @@ Defense in depth uses multiple layered security controls (physical, technical, a
 
 </body></html>
 
-    <!-- ======================================================== -->
-    <!-- 🏆 كرت عرض النتيجة (Result Card) - مصلح ويظهر تلقائياً -->
-    <!-- ======================================================== -->
-    <div id="result-card" class="question-card" style="display: none; background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border: 2px solid #3b82f6; text-align: center; padding: 30px; margin-bottom: 20px;">
+  <div id="result-card" class="question-card" style="display: none; background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border: 2px solid #3b82f6; text-align: center; padding: 30px; margin-bottom: 20px;">
         <h2 style="color: #1e3a8a; margin-bottom: 10px;">🎉 اكتمل الاختبار!</h2>
         <p style="font-size: 18px; color: #1e40af; margin: 5px 0;">درجتك هي:</p>
         <div id="score-display" style="font-size: 36px; font-weight: bold; color: #2563eb; margin: 10px 0;">0 / 0</div>
         <div id="score-percentage" style="font-size: 20px; font-weight: bold; color: #1d4ed8;">النسبة المئوية: 0%</div>
     </div>
 
-    <!-- ======================================================== -->
-    <!-- 🔵 زر إرسال الإجابات (Submit Button) -->
-    <!-- ======================================================== -->
-    <div style="text-align: center; margin: 30px 0;">
-        <button onclick="gradeQuiz()" style="background-color: #2563eb; color: white; border: none; padding: 15px 40px; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); transition: background 0.2s;">
+    <div style="text-align: center; margin: 30px 0; display: flex; flex-direction: column; align-items: center; gap: 10px;">
+        <button onclick="gradeQuiz(false)" style="background-color: #2563eb; color: white; border: none; padding: 15px 40px; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); transition: background 0.2s;">
             إرسال الإجابات وتصحيح الاختبار (Submit)
+        </button>
+        
+        <button onclick="gradeQuiz(true)" style="background-color: #64748b; color: white; border: none; padding: 6px 15px; border-radius: 6px; font-size: 12px; cursor: pointer; opacity: 0.6; transition: opacity 0.2;">
+            وضع الفحص السريع للمطور (تجاوز شرط إكمال الحل 🛠️)
         </button>
     </div>
 
-    <!-- ======================================================== -->
-    <!-- 📝 قسم التقييم: مربوط بحسابك في Formspree ويظهر بعد الحل -->
-    <!-- ======================================================== -->
     <div id="feedback-card" class="question-card" style="margin-top: 20px; border-top: 4px solid #3b82f6; display: none;">
         <h3 style="margin-bottom: 15px; color: #1e3a8a; text-align: center;">📝 قيم تجربتك في هذا الاختبار</h3>
         
@@ -3536,9 +3540,6 @@ Defense in depth uses multiple layered security controls (physical, technical, a
         </form>
     </div>
 
-    <!-- ======================================================== -->
-    <!-- ⚙️ السكربت المصلح والمحدث بالكامل -->
-    <!-- ======================================================== -->
     <script>
         function toggleExpl(btn) {
             var expl = btn.nextElementSibling;
@@ -3551,8 +3552,8 @@ Defense in depth uses multiple layered security controls (physical, technical, a
             }
         }
 
-        function gradeQuiz() {
-            // جلب الكروت مع استثناء كرت النتيجة والتقييم
+        function gradeQuiz(bypassEmptyCheck = false) {
+            // جلب الكروت مع استثناء كروت النتائج والتقييم
             const cards = document.querySelectorAll('.question-card:not(#feedback-card):not(#result-card)');
             let unansweredQuestions = []; 
             
@@ -3566,13 +3567,14 @@ Defense in depth uses multiple layered security controls (physical, technical, a
                         if (match) {
                             unansweredQuestions.push(match[1]); 
                         } else {
-                            unansweredQuestions.push("غير معروف");
+                            unansweredQuestions.push("Unknown");
                         }
                     }
                 }
             });
 
-            if (unansweredQuestions.length > 0) {
+            // إذا لم يكن وضع المطور مفعلاً وهناك أسئلة ناقصة، نبه المستخدم واخرج
+            if (!bypassEmptyCheck && unansweredQuestions.length > 0) {
                 alert(`⚠️ تنبيه: لم تقم بحل جميع الأسئلة!\n\nالأسئلة الناقصة هي:\n[ ${unansweredQuestions.join(', ')} ]\n\nالرجاء حلها أولاً لتتمكن من رؤية النتيجة.`);
                 return; 
             }
@@ -3587,10 +3589,11 @@ Defense in depth uses multiple layered security controls (physical, technical, a
                 
                 let correctAnswers = [];
                 
-                // استخراج الإجابات الصحيحة بشكل دقيق جداً (يدعم الإجابات المتعددة والمفردة)
+                // 🔍 التحديث القوي جداً لقراءة الحروف الصحيحة (يدعم المفرد والجمع وبدون نقطتين)
                 if (explDiv) {
                     const text = explDiv.innerText || explDiv.textContent;
-                    const match = text.match(/Correct\s*Answer[s]?\s*:\s*([A-F](\s*(and|,|\s)\s*[A-F])*)/i);
+                    // regex مرن جداً يلقط الحروف بعد كلمة Answer أو Answers وبغض النظر عن شكل النقطتين الفاصلة
+                    const match = text.match(/Correct\s*Answer[s]?\s*[:\s]*([A-F](\s*(and|,|\s)\s*[A-F])*)/i);
                     if (match) {
                         correctAnswers = match[1].toUpperCase().match(/[A-F]/g) || [];
                     }
@@ -3607,7 +3610,6 @@ Defense in depth uses multiple layered security controls (physical, technical, a
                     
                     if (option.classList.contains('active')) {
                         selectedOptions.push(optionLetter);
-                        // إذا كان الخيار المختار صحيحاً
                         if (correctAnswers.includes(optionLetter)) {
                             option.style.setProperty('background-color', '#d1fae5', 'important');
                             option.style.setProperty('border-color', '#16a34a', 'important');
@@ -3615,13 +3617,11 @@ Defense in depth uses multiple layered security controls (physical, technical, a
                             option.style.setProperty('font-weight', 'bold', 'important');
                             correctCount++;
                         } else {
-                            // إذا اختار خياراً خاطئاً تلون بالأحمر
                             option.style.setProperty('background-color', '#fee2e2', 'important');
                             option.style.setProperty('border-color', '#dc2626', 'important');
                             option.style.setProperty('color', '#991b1b', 'important');
                         }
                     } else {
-                        // خيار لم يختاره المستخدم ولكنه الإجابة الصحيحة (يتلون بالأخضر الخفيف كدليل)
                         if (correctAnswers.includes(optionLetter)) {
                             option.style.setProperty('background-color', '#f0fdf4', 'important');
                             option.style.setProperty('border-color', '#16a34a', 'important');
@@ -3630,7 +3630,6 @@ Defense in depth uses multiple layered security controls (physical, technical, a
                     }
                 });
 
-                // شروط احتساب درجة السؤال (يجب أن يختار كل الإجابات الصحيحة وبدون أي اختيار خاطئ)
                 if (correctAnswers.length > 0 && 
                     selectedOptions.length === correctAnswers.length && 
                     correctCount === correctAnswers.length) {
@@ -3641,7 +3640,7 @@ Defense in depth uses multiple layered security controls (physical, technical, a
                 if (showBtn) showBtn.innerText = "Hide Explanation";
             });
 
-            // إظهار كرت النتيجة وتحديث البيانات بداخله
+            // إظهار النتائج
             const resultCard = document.getElementById('result-card');
             const feedbackCard = document.getElementById('feedback-card');
             const scoreDisplay = document.getElementById('score-display');
@@ -3655,12 +3654,10 @@ Defense in depth uses multiple layered security controls (physical, technical, a
                 resultCard.style.display = "block";
                 if (feedbackCard) feedbackCard.style.display = "block"; 
                 
-                // الانتقال التلقائي للنتيجة بشكل سلس
                 window.scrollTo({ top: resultCard.offsetTop - 40, behavior: 'smooth' });
             }
         }
 
-        // تفاعل النجوم للتقييم
         document.querySelectorAll('.rating-stars label').forEach(star => {
             star.addEventListener('click', function() {
                 let prev = this;
@@ -3672,7 +3669,6 @@ Defense in depth uses multiple layered security controls (physical, technical, a
             });
         });
 
-        // التحكم الذكي في الاختيارات متعددة الإجابات
         document.querySelectorAll('.option').forEach(option => {
             option.style.cursor = "pointer";
             option.addEventListener('click', function() {
@@ -3680,7 +3676,6 @@ Defense in depth uses multiple layered security controls (physical, technical, a
                 const headerText = header ? header.innerText : '';
                 
                 let maxSelect = 1;
-                // فحص إذا كان السؤال يتطلب إجابتين أو ثلاثة
                 if (headerText.includes('Select 2') || headerText.includes('Choose 2') || headerText.includes('TWO')) maxSelect = 2;
                 if (headerText.includes('Select 3') || headerText.includes('Choose 3') || headerText.includes('THREE')) maxSelect = 3;
                 
@@ -3717,10 +3712,52 @@ Defense in depth uses multiple layered security controls (physical, technical, a
             });
         });
     </script>
+    <script>
+window.addEventListener('DOMContentLoaded', (event) => {
+    document.querySelectorAll('.question-card').forEach((card) => {
+        let explDiv = card.querySelector('.explanation');
+        let btn = card.querySelector('.show-btn');
+
+        // 1. إذا لم يوجد زر، قم بإنشائه فوراً
+        if (!btn && explDiv) {
+            btn = document.createElement('button');
+            btn.className = 'show-btn';
+            btn.innerText = 'Show Correct Answer & Explanation';
+            btn.onclick = function() {
+                if (explDiv.style.display === "block") {
+                    explDiv.style.display = "none";
+                    this.innerText = "Show Correct Answer & Explanation";
+                } else {
+                    explDiv.style.display = "block";
+                    this.innerText = "Hide Explanation";
+                }
+            };
+            card.insertBefore(btn, explDiv);
+        }
+
+        // 2. إذا كانت الإجابة ظاهرة مباشرة، قم بنقلها للداخل وإخفاؤها
+        let childNodes = Array.from(card.childNodes);
+        childNodes.forEach(node => {
+            if (node.nodeType === Node.ELEMENT_NODE && 
+                (node.innerText.includes("Correct Answer") || node.innerText.includes("Correct Answers")) && 
+                node !== explDiv && node !== btn && !node.classList.contains('q-header') && !node.classList.contains('options')) {
+                
+                if (explDiv) {
+                    explDiv.prepend(document.createElement('br'));
+                    explDiv.prepend(document.createTextNode(node.innerText));
+                    node.style.display = 'none'; // إخفاء النص الأصلي المزعج
+                }
+            }
+        });
+
+        // 3. تأكد دائماً أن الشرح مخفي في البداية
+        if (explDiv) explDiv.style.display = 'none';
+    });
+});
+</script>
 </body>
 </html>
 
-            // تحديث كرت النتيجة في الأعلى
           
 
 ```
