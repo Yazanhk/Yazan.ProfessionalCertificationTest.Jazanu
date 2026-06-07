@@ -3522,7 +3522,9 @@ Defense in depth uses multiple layered security controls (physical, technical, a
             إرسال الإجابات وتصحيح الاختبار (Submit)
         </button>
         
-        
+        <button onclick="gradeQuiz(true)" style="background-color: #64748b; color: white; border: none; padding: 6px 15px; border-radius: 6px; font-size: 12px; cursor: pointer; opacity: 0.6; transition: opacity 0.2;">
+            وضع الفحص السريع للمطور (تجاوز شرط إكمال الحل 🛠️)
+        </button>
     </div>
 
     <div id="feedback-card" class="question-card" style="margin-top: 20px; border-top: 4px solid #3b82f6; display: none;">
@@ -3624,34 +3626,32 @@ Defense in depth uses multiple layered security controls (physical, technical, a
     const optionText = option.innerText.trim();
     const optionLetter = optionText.charAt(0).toUpperCase();
     
-    // تحديد نوع السؤال
+    // التحقق هل السؤال متعدد الاختيارات
     const headerText = card.querySelector('.q-header').innerText;
     const isMultiSelect = headerText.includes('Select 2') || headerText.includes('Select 3') || headerText.includes('TWO') || headerText.includes('THREE');
     
+    // 1. إذا كان الخيار هو الذي اخترته أنت:
     if (option.classList.contains('active')) {
         selectedOptions.push(optionLetter);
-        
         if (correctAnswers.includes(optionLetter)) {
-            // ✅ إجابتك صحيحة (أخضر)
-            option.style.setProperty('background-color', '#d1fae5', 'important');
-            option.style.setProperty('border-color', '#16a34a', 'important');
-            option.style.setProperty('color', '#065f46', 'important');
-            option.style.setProperty('font-weight', 'bold', 'important');
+            // ✅ إجابة صحيحة (أخضر غامق)
+            option.style.setProperty('background-color', '#16a34a', 'important');
+            option.style.setProperty('border-color', '#166534', 'important');
+            option.style.setProperty('color', '#ffffff', 'important');
             correctCount++;
         } else {
-            // 🟡 إجابتك خاطئة (أصفر)
-            option.style.setProperty('background-color', '#fef9c3', 'important');
-            option.style.setProperty('border-color', '#eab308', 'important');
-            option.style.setProperty('color', '#854d0e', 'important');
-            option.style.setProperty('font-weight', 'bold', 'important');
+            // 🔴 إجابة خاطئة (أحمر)
+            option.style.setProperty('background-color', '#dc2626', 'important');
+            option.style.setProperty('border-color', '#991b1b', 'important');
+            option.style.setProperty('color', '#ffffff', 'important');
         }
-    } else {
-        // إظهار الإجابات الصحيحة (الأخضر الفاتح) للأسئلة المتعددة فقط
-        if (isMultiSelect && correctAnswers.includes(optionLetter)) {
-            option.style.setProperty('background-color', '#f0fdf4', 'important');
-            option.style.setProperty('border-color', '#16a34a', 'important');
-            option.style.setProperty('color', '#16a34a', 'important');
-        }
+    } 
+    // 2. إذا كان الخيار لم تختره (الإجابات التي فاتتك):
+    else if (isMultiSelect && correctAnswers.includes(optionLetter)) {
+        // 🟡 إجابة صحيحة فاتتك (أصفر)
+        option.style.setProperty('background-color', '#fef08a', 'important');
+        option.style.setProperty('border-color', '#eab308', 'important');
+        option.style.setProperty('color', '#854d0e', 'important');
     }
 });
 
