@@ -3621,41 +3621,41 @@ Defense in depth uses multiple layered security controls (physical, technical, a
                 let correctCount = 0;
 
                 options.forEach(option => {
-                    option.removeAttribute('style');
-                    option.style.cursor = "pointer"; 
-                    const optionText = option.innerText.trim();
-                    const optionLetter = optionText.charAt(0).toUpperCase();
-                    
-                    // تحديد هل هذا السؤال يتطلب إجابة واحدة أم متعدد؟
-                    const headerText = card.querySelector('.q-header').innerText;
-                    const isMultiSelect = headerText.includes('Select 2') || headerText.includes('Select 3') || headerText.includes('TWO') || headerText.includes('THREE');
-                    
-                    // ابحث عن هذا الجزء داخل options.forEach واستبدله بما يلي:
-
-if (option.classList.contains('active')) {
-    selectedOptions.push(optionLetter);
-    if (correctAnswers.includes(optionLetter)) {
-        // إجابة صحيحة (أخضر)
-        option.style.setProperty('background-color', '#d1fae5', 'important');
-        option.style.setProperty('border-color', '#16a34a', 'important');
-        option.style.setProperty('color', '#065f46', 'important');
-        correctCount++;
+    option.removeAttribute('style');
+    option.style.cursor = "pointer"; 
+    const optionText = option.innerText.trim();
+    const optionLetter = optionText.charAt(0).toUpperCase();
+    
+    // تحديد نوع السؤال
+    const headerText = card.querySelector('.q-header').innerText;
+    const isMultiSelect = headerText.includes('Select 2') || headerText.includes('Select 3') || headerText.includes('TWO') || headerText.includes('THREE');
+    
+    if (option.classList.contains('active')) {
+        selectedOptions.push(optionLetter);
+        
+        if (correctAnswers.includes(optionLetter)) {
+            // ✅ إجابتك صحيحة (أخضر)
+            option.style.setProperty('background-color', '#d1fae5', 'important');
+            option.style.setProperty('border-color', '#16a34a', 'important');
+            option.style.setProperty('color', '#065f46', 'important');
+            option.style.setProperty('font-weight', 'bold', 'important');
+            correctCount++;
+        } else {
+            // 🟡 إجابتك خاطئة (أصفر)
+            option.style.setProperty('background-color', '#fef9c3', 'important');
+            option.style.setProperty('border-color', '#eab308', 'important');
+            option.style.setProperty('color', '#854d0e', 'important');
+            option.style.setProperty('font-weight', 'bold', 'important');
+        }
     } else {
-        // 🟡 إجابة خاطئة (أصفر احترافي بدلاً من الأحمر)
-        option.style.setProperty('background-color', '#fef9c3', 'important'); // خلفية صفراء فاتحة
-        option.style.setProperty('border-color', '#eab308', 'important');    // حدود صفراء غامقة
-        option.style.setProperty('color', '#854d0e', 'important');           // نص بني داكن للقراءة
+        // إظهار الإجابات الصحيحة (الأخضر الفاتح) للأسئلة المتعددة فقط
+        if (isMultiSelect && correctAnswers.includes(optionLetter)) {
+            option.style.setProperty('background-color', '#f0fdf4', 'important');
+            option.style.setProperty('border-color', '#16a34a', 'important');
+            option.style.setProperty('color', '#16a34a', 'important');
+        }
     }
-}
-                    } else {
-                        // هنا التعديل: لن يتم تلوين الإجابة الصحيحة (التي لم تخترها) بالأخضر إلا إذا كان السؤال يتطلب أكثر من إجابة
-                        if (isMultiSelect && correctAnswers.includes(optionLetter)) {
-                            option.style.setProperty('background-color', '#f0fdf4', 'important');
-                            option.style.setProperty('border-color', '#16a34a', 'important');
-                            option.style.setProperty('color', '#16a34a', 'important');
-                        }
-                    }
-                });
+});
 
                 if (correctAnswers.length > 0 && 
                     selectedOptions.length === correctAnswers.length && 
